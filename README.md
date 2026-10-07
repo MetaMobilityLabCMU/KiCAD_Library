@@ -47,40 +47,62 @@ Every path in this library starts with `${MY_LIBS}` instead of a real folder, so
 
 1. In the main KiCad window (the project manager, not one of the editors), click **Preferences > Configure Paths**.
 2. Under the **Environment Variables** table, click **+**.
-3. Set **Name** to `MY_LIBS` and **Path** to the folder you cloned, the one that contains `custom` and `lcsc`.
-4. Click **OK**.
+3. Set **Name** to:
+
+   ```
+   MY_LIBS
+   ```
+
+4. Set **Path** to the folder you cloned, the one that contains `custom` and `lcsc`.
+5. Click **OK**.
 
 ### 3. Add the symbol libraries
 
 1. Click **Preferences > Manage Symbol Libraries** and open the **Global Libraries** tab.
 2. Click the folder icon below the table, browse to `KiCAD_Library/custom`, select `my_symbols.kicad_sym`, and click **Open**.
 3. Click the folder icon again, browse to `KiCAD_Library/lcsc`, and select `lcsc.kicad_sym`.
-4. Edit the two new rows so they read exactly as below, then click **OK**.
+4. Check that the **Nickname** column of the two new rows reads `my_symbols` and `lcsc`.
+5. Replace the **Library Path** of each row with the path below, then click **OK**.
 
-| Nickname | Library Path |
-|---|---|
-| `my_symbols` | `${MY_LIBS}/custom/my_symbols.kicad_sym` |
-| `lcsc` | `${MY_LIBS}/lcsc/lcsc.kicad_sym` |
+Library path for `my_symbols`:
+
+```
+${MY_LIBS}/custom/my_symbols.kicad_sym
+```
+
+Library path for `lcsc`:
+
+```
+${MY_LIBS}/lcsc/lcsc.kicad_sym
+```
 
 ### 4. Add the footprint libraries
 
 1. Click **Preferences > Manage Footprint Libraries** and open the **Global Libraries** tab.
 2. Click the folder icon below the table, browse to `KiCAD_Library/custom`, click the `my_footprints.pretty` folder once, and click **Select Folder**.
 3. Do the same for `KiCAD_Library/lcsc/lcsc.pretty`.
-4. Edit the two new rows so they read exactly as below, then click **OK**.
+4. Check that the **Nickname** column of the two new rows reads `my_footprints` and `lcsc`.
+5. Replace the **Library Path** of each row with the path below, then click **OK**.
 
-| Nickname | Library Path |
-|---|---|
-| `my_footprints` | `${MY_LIBS}/custom/my_footprints.pretty` |
-| `lcsc` | `${MY_LIBS}/lcsc/lcsc.pretty` |
+Library path for `my_footprints`:
+
+```
+${MY_LIBS}/custom/my_footprints.pretty
+```
+
+Library path for `lcsc`:
+
+```
+${MY_LIBS}/lcsc/lcsc.pretty
+```
 
 The nicknames have to match these exactly. Symbols point at their footprints by nickname, so a different nickname breaks the link.
 
 ### 5. Check that it worked
 
-1. Open the **Symbol Editor** and search for `XT30`. It should be listed under `my_symbols`.
-2. Open the **Footprint Editor**, search for `XT30`, and double-click the footprint under `my_footprints`.
-3. Click **View > 3D Viewer**. You should see the connector sitting on its pads.
+1. Open the **Symbol Editor** and expand `my_symbols` in the library list. Its parts should be listed.
+2. Open the **Footprint Editor**, expand `my_footprints`, and double-click any footprint.
+3. Click **View > 3D Viewer**. You should see the part's 3D model sitting on its pads.
 
 If something is missing:
 
@@ -105,7 +127,7 @@ A complete part is three files that have to be linked together:
 | PCB footprint | `.kicad_mod` | `my_footprints` |
 | 3D model | `.step` | `custom/3dmodels/` |
 
-The steps below use one real part as the example throughout: the Amass `XT30PW(2+2)-M.G.B` power connector, LCSC part number `C19268030`.
+In the steps below, `PART_NAME` and `FOOTPRINT_NAME` are placeholders. Replace them with the names of the files you downloaded.
 
 Pull the repository before you start, so you are adding to the latest version.
 
@@ -116,13 +138,13 @@ Pull the repository before you start, so you are adding to the latest version.
 3. Download the 3D model too, either included in the same zip or from a separate **Download 3D Model** button.
 4. Extract the zip. You should have three files:
 
-| File | Example |
+| File | Named like |
 |---|---|
-| Symbol | `XT30PW_2_2_-M.G.B.kicad_sym` |
-| Footprint | `AMASS_XT30PW_2_2_-M.G.B.kicad_mod` |
-| 3D model | `XT30PW_2_2_-M.G.B.step` |
+| Symbol | `PART_NAME.kicad_sym` |
+| Footprint | `FOOTPRINT_NAME.kicad_mod` |
+| 3D model | `PART_NAME.step` |
 
-Use the exact part number, not a close relative. The plain 2-pin `XT30PW` has a different hole pattern from the 2+2 version, for example.
+Use the exact part number, not a close relative. Variants in the same family often have a different pin count or hole pattern.
 
 ### 2. Import the symbol
 
@@ -143,10 +165,10 @@ Use the exact part number, not a close relative. The plain 2-pin `XT30PW` has a 
 
 1. Copy the `.step` file into `KiCAD_Library/custom/3dmodels/`.
 2. In the Footprint Editor, with the footprint open, click **File > Footprint Properties** and open the **3D Models** tab.
-3. Click **+** to add a row, and enter the path using `${MY_LIBS}`:
+3. Click **+** to add a row, and enter this path, replacing `PART_NAME.step` with your file's name:
 
    ```
-   ${MY_LIBS}/custom/3dmodels/XT30PW_2_2_-M.G.B.step
+   ${MY_LIBS}/custom/3dmodels/PART_NAME.step
    ```
 
 4. Look at the preview. If it is empty, the file name or path does not match.
@@ -158,21 +180,25 @@ Use the exact part number, not a close relative. The plain 2-pin `XT30PW` has a 
 
 Never browse to the file and leave a path that starts with `C:/Users/...`. That path only exists on your computer, so the model would be missing for everyone else.
 
-For the XT30 example, the model needed Rotation X = `-90` and Offset Y = `7.3` mm.
-
 ### 5. Link the symbol to the footprint
 
 KiCad does not link them automatically. The link is a text field on the symbol named **Footprint**, written as `library:footprint`. When you place the symbol in a schematic and update the PCB, KiCad reads that field to pick the footprint, then connects symbol pin 1 to pad 1, pin 2 to pad 2, and so on.
 
 1. In the **Symbol Editor**, open the symbol and click **File > Symbol Properties**.
-2. Set the **Footprint** field to the footprint's library and name:
+2. Set the **Footprint** field to the line below, replacing `FOOTPRINT_NAME` with the footprint's name as it appears under `my_footprints` in the Footprint Editor:
 
    ```
-   my_footprints:AMASS_XT30PW_2_2_-M.G.B
+   my_footprints:FOOTPRINT_NAME
    ```
 
-3. Click **+** to add a field named exactly `LCSC Part #`, and set its value to the part's LCSC number (`C19268030` for the example). JLCPCB's assembly export reads this field.
-4. Click **OK**, then press **Ctrl+S**.
+3. Click **+** to add a field, and name it exactly:
+
+   ```
+   LCSC Part #
+   ```
+
+4. Set that field's value to the part's LCSC number, which is the letter `C` followed by digits. JLCPCB's assembly export reads this field.
+5. Click **OK**, then press **Ctrl+S**.
 
 To check the link, reopen Symbol Properties and click the library icon at the end of the Footprint cell. The footprint browser should open with the right footprint selected.
 
@@ -190,7 +216,7 @@ Commit and push so everyone else gets the part on their next pull:
 
 ```bash
 git add -A
-git commit -m "Add XT30PW(2+2)-M.G.B connector (C19268030)"
+git commit -m "Add PART_NAME (LCSC number)"
 git push
 ```
 
