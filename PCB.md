@@ -66,23 +66,187 @@ The individual layer thicknesses only matter for controlled-impedance work. Leav
 
 ### Constraints
 
-The **Constraints** page holds the hard limits. The design rules check reports anything below them as an error. Set them a little above JLCPCB's absolute limits, so a board that passes DRC is comfortably manufacturable.
+The **Constraints** page holds the hard limits. The design rules check reports anything below them as an error. These values sit a little above JLCPCB's absolute limits, so a board that passes DRC is comfortably manufacturable. All values are in mm.
 
-| Constraint | JLCPCB limit (2-layer, 1 oz) | Set it to |
+| Constraint | Two-layer board | Four-layer board |
 |---|---|---|
-| Minimum clearance | 0.10 mm | `0.15` mm |
-| Minimum track width | 0.10 mm | `0.15` mm |
-| Minimum annular width | 0.18 mm on plated holes | `0.15` mm |
-| Minimum via diameter | 0.25 mm | `0.6` mm |
-| Minimum through hole | 0.15 mm | `0.3` mm |
-| Copper to hole clearance | 0.2 mm | `0.25` mm |
-| Copper to edge clearance | 0.2 mm routed, 0.4 mm V-cut | `0.3` mm, or `0.5` mm if the board is V-cut from a panel |
-| Hole to hole clearance | 0.2 mm via, 0.45 mm pad | `0.25` mm |
-| Silkscreen minimum item clearance | 0.15 mm pad to silkscreen | `0.15` mm |
-| Silkscreen minimum text height | 1.0 mm | `1.0` mm |
-| Silkscreen minimum text thickness | 0.15 mm | `0.15` mm |
+| Minimum clearance | `0.15` | `0.127` |
+| Minimum track width | `0.15` | `0.127` |
+| Minimum annular width | `0.15` | `0.15` |
+| Minimum via diameter | `0.6` | `0.5` |
+| Minimum through hole | `0.3` | `0.2` |
+| Copper to hole clearance | `0.25` | `0.3` |
+| Copper to edge clearance | `0.3` | `0.3` |
+| Hole to hole clearance | `0.25` | `0.25` |
+| Silkscreen minimum item clearance | `0.15` | `0.15` |
+| Silkscreen minimum text height | `1.0` | `1.0` |
+| Silkscreen minimum text thickness | `0.15` | `0.15` |
 
-These settings allow vias of 0.3 mm hole and 0.6 mm diameter or larger. JLCPCB can make much smaller ones, down to 0.15 mm hole and 0.25 mm diameter. Lower the via constraints only when a dense board needs it.
+Four-layer boards are made on a finer process, so they allow narrower tracks and smaller vias. Inner layers need more room around plated holes, which is why copper-to-hole clearance goes up.
+
+If the board will be V-cut from a panel, set **Copper to edge clearance** to `0.5` on either kind of board.
+
+For each kind of board, the sections below list every value on its own, so you can copy it with the copy button and paste it into the matching box.
+
+<details>
+<summary><b>Two-layer values to copy</b></summary>
+
+Minimum clearance:
+
+```
+0.15
+```
+
+Minimum track width:
+
+```
+0.15
+```
+
+Minimum annular width:
+
+```
+0.15
+```
+
+Minimum via diameter:
+
+```
+0.6
+```
+
+Minimum through hole:
+
+```
+0.3
+```
+
+Copper to hole clearance:
+
+```
+0.25
+```
+
+Copper to edge clearance:
+
+```
+0.3
+```
+
+Hole to hole clearance:
+
+```
+0.25
+```
+
+Silkscreen minimum item clearance:
+
+```
+0.15
+```
+
+Silkscreen minimum text height:
+
+```
+1.0
+```
+
+Silkscreen minimum text thickness:
+
+```
+0.15
+```
+
+</details>
+
+<details>
+<summary><b>Four-layer values to copy</b></summary>
+
+Minimum clearance:
+
+```
+0.127
+```
+
+Minimum track width:
+
+```
+0.127
+```
+
+Minimum annular width:
+
+```
+0.15
+```
+
+Minimum via diameter:
+
+```
+0.5
+```
+
+Minimum through hole:
+
+```
+0.2
+```
+
+Copper to hole clearance:
+
+```
+0.3
+```
+
+Copper to edge clearance:
+
+```
+0.3
+```
+
+Hole to hole clearance:
+
+```
+0.25
+```
+
+Silkscreen minimum item clearance:
+
+```
+0.15
+```
+
+Silkscreen minimum text height:
+
+```
+1.0
+```
+
+Silkscreen minimum text thickness:
+
+```
+0.15
+```
+
+</details>
+
+JLCPCB's own limits, for reference, from its capabilities page (1 oz copper, in mm):
+
+| Constraint | Two-layer limit | Four-layer limit |
+|---|---|---|
+| Minimum clearance | 0.10 | 0.09 |
+| Minimum track width | 0.10 | 0.09 |
+| Minimum annular width | 0.18 on plated holes | 0.15 on plated holes |
+| Minimum via diameter | 0.25 | 0.25 |
+| Minimum through hole | 0.15 | 0.15 |
+| Copper to hole clearance | 0.2 | 0.2, and 0.3 from plated holes on inner layers |
+| Copper to edge clearance | 0.2 routed, 0.4 V-cut | 0.2 routed, 0.4 V-cut |
+| Hole to hole clearance | 0.2 via, 0.45 pad | 0.2 via, 0.45 pad |
+| Silkscreen minimum item clearance | 0.15 | 0.15 |
+| Silkscreen minimum text height | 1.0 | 1.0 |
+| Silkscreen minimum text thickness | 0.15 | 0.15 |
+
+Go below the recommended values only when a dense board needs it, and never below JLCPCB's limits.
 
 ### Net classes
 
@@ -103,7 +267,7 @@ On the **Pre-defined Sizes** page, add the widths and vias you'll use often. The
 
 | Tracks | Vias (diameter / hole) |
 |---|---|
-| `0.25`, `0.5`, `1.0`, `2.0` mm | `0.6 / 0.3`, `0.8 / 0.4` mm |
+| `0.25`, `0.5`, `1.0`, `2.0` mm | `0.6 / 0.3`, `0.8 / 0.4` mm, and `0.5 / 0.2` mm on four-layer boards |
 
 ### Text and graphics defaults
 
