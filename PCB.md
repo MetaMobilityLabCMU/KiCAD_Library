@@ -113,16 +113,64 @@ Go below the recommended values only when a dense board needs it, and never belo
 
 ### Net classes
 
-A net class is a group of nets that share a track width, clearance, and via size. The **Net Classes** page holds them. Net classes are shared between the schematic and the board.
+**A net** is one electrical connection: everything wired together in the schematic. `GND` is one net, a `+5V` rail is another, and each signal wire is its own net.
 
-| Class | Clearance | Track width | Via diameter | Via hole | Use for |
+**A net class** is a group of nets that should be routed the same way. Signals carry almost no current and are fine with thin tracks. Power nets carry much more and need wide ones. A net class stores the settings once, and KiCad applies them every time you route one of its nets, so you never have to remember to change the width.
+
+Most boards need just two classes:
+
+| Class | Clearance | Track width | Via size | Via hole | Use for |
 |---|---|---|---|---|---|
 | `Default` | `0.2` | `0.25` | `0.6` | `0.3` | Signals |
 | `Power` | `0.25` | `0.5` or wider | `0.8` | `0.4` | Supply rails and ground. Size the width from [Trace widths](#trace-widths) |
 
-Assign nets to a class in the lower table on the same page, using a pattern. For example, the pattern `GND` puts the ground net in `Power`, and `+*` puts every net whose name starts with `+` in `Power`.
+#### Set them up
 
-When you route a net, KiCad starts with its class's track width.
+1. Open the **Net Classes** page in Board Setup. It's shared with the schematic, so it shows the same thing in both editors.
+2. In the top table, add a row named `Power` and fill in its values. `Default` is already there.
+3. In the bottom table, add one row for each power net. Each row has a **pattern** that matches net names, and the class those nets go into.
+4. Click **OK**.
+
+Example assignments:
+
+| Pattern | Net class | Matches |
+|---|---|---|
+| `GND` | `Power` | The ground net |
+| `+BATT` | `Power` | A net named exactly `+BATT` |
+| `+*` | `Power` | Every net whose name starts with `+`, such as `+5V` and `+3V3` |
+| `*VIN` | `Power` | `VIN`, and also `/VIN`. Nets from some labels get a `/` in front |
+
+#### Things to know
+
+- **Unassigned nets go to `Default` automatically.** You only add rows for nets that need something different, usually just the power nets. Signal nets need no rows at all.
+- **Wildcards:** `*` matches any run of characters and `?` matches one character.
+- **Keep patterns specific.** A loose pattern catches nets you didn't mean. `*1` would match `1`, `11`, `21`, and `3V3_1` all at once.
+- **Find a net's exact name** by clicking one of its pads in the PCB Editor. The name shows in the properties panel.
+- **Check the result** with **Inspect > Net Inspector**, which lists every net and its class.
+
+#### What it changes
+
+| When you... | The net class sets... |
+|---|---|
+| Route a track (X) | Its starting width |
+| Add a via while routing | The via's size and hole |
+| Run the design rules check | How far the net must stay from other nets |
+| Fill a copper zone | How far the fill stays from other nets: the larger of the zone's own clearance and the net class clearance |
+
+Track width does not apply to copper zones, which use their own **Minimum width** setting. Note that the design rules check never checks whether copper can carry its current. A net class width is a good starting point, not a guarantee. Size power paths yourself from [Trace widths](#trace-widths).
+
+#### The other columns
+
+The Net Classes table has more columns than the ones above. You can usually leave them alone:
+
+| Column | What it's for | What to do |
+|---|---|---|
+| µVia Size, µVia Hole | Microvias: tiny laser-drilled vias for very dense boards | Leave them |
+| DP Width, DP Gap | Differential pairs: width and spacing for pairs such as USB D+ and D−, routed with **Route Differential Pair** (6) | Leave the defaults unless you route a fast pair |
+| Tuning Profile | Length tuning, for matching track lengths on fast signals | Leave it blank |
+| PCB Color | Colours this class's nets on the board | Optional. A red `Power` class makes power paths easy to spot |
+
+Blank cells in a class other than `Default` are fine. They take their value from `Default`.
 
 ### Pre-defined sizes
 
@@ -359,8 +407,39 @@ Zones do not update by themselves. Press **B** again after any change, and befor
 |---|---|---|
 | Clearance | `0.3` mm | Keeps the pour away from other nets |
 | Minimum width | `0.25` mm | Avoids thin slivers of copper |
-| Pad connections | Thermal reliefs | Spokes instead of a solid joint, so pads can still be soldered by hand |
+| Pad connections | Thermal reliefs | Spokes instead of a solid joint, so pads can still be soldered by hand. See [Thermal reliefs](#thermal-reliefs) |
 | Remove islands | Always | Deletes copper pieces that connect to nothing |
+
+### Thermal reliefs
+
+A large copper zone acts like a heatsink. When a pad sits inside one, the zone pulls heat away from the pad as fast as the soldering iron puts it in. The pad never gets hot enough for solder to flow properly, which leaves a weak, grainy joint.
+
+A thermal relief fixes this. Instead of joining the pad to the zone all the way round, KiCad leaves a ring of bare board around the pad and crosses it with a few thin copper spokes. Less heat escapes through the spokes, so the pad heats up quickly.
+
+The cost is current. The spokes are now the only path between the pad and the zone, so they limit how much current the pad can carry.
+
+KiCad gives two main choices:
+
+| Joint | What it looks like | Good for | Drawback |
+|---|---|---|---|
+| Thermal relief (the default) | A ring of bare board around the pad, crossed by a few thin copper spokes | Easy soldering. Little heat leaks into the zone | The spokes limit how much current reaches the pad |
+| Solid | The zone runs straight into the pad, with no gap | High current, because the full width of copper connects | The zone soaks up heat, so the pad needs a hot iron and patience to solder |
+
+For most pads, such as a resistor or capacitor on `GND`, the spokes carry far more current than needed. Use a solid joint, or wider spokes, only on pads carrying several amps, such as a battery or power connector.
+
+#### Where to set it
+
+| Scope | Where | Setting |
+|---|---|---|
+| A whole zone | Double-click the zone's edge | **Pad connections**: thermal reliefs, solid, or none. Also the **thermal relief gap** and **spoke width** |
+| One footprint | The footprint's properties (E) | Its pads' connection to zones |
+| One pad | The pad's properties | That pad's connection to zones |
+
+The more specific setting wins. A good arrangement:
+
+- **The ground zone:** leave it on thermal reliefs, so most parts are easy to solder.
+- **High-current connectors:** set their footprint to solid.
+- **For a little more current while keeping soldering easy,** raise the zone's spoke width instead, for example from `0.5` to `1.0` mm.
 
 ### Practices
 
