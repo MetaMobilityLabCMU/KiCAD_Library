@@ -6,6 +6,7 @@ These instructions are written for KiCad 10, with JLCPCB as the manufacturer.
 
 - [How a footprint links to its symbol](#how-a-footprint-links-to-its-symbol)
 - [Before you draw](#before-you-draw)
+- [Common footprints in KiCad's libraries](#common-footprints-in-kicads-libraries)
 - [Coordinates](#coordinates)
 - [The layers](#the-layers)
 - [Pad standards](#pad-standards)
@@ -41,6 +42,97 @@ Decide the Numbers once, on the symbol, and copy them onto the pads.
 - **Check which side the drawing shows.** Footprints are drawn looking down at the top of the board. If the drawing is labelled "bottom view", mirror it.
 - **Find out what each dimension is measured from.** Some are from the board edge and some are from the centre of the first hole. Mixing them up shifts everything.
 - **Work in the datasheet's units.** Switch the editor between mm and mils so you can type the datasheet's numbers without converting.
+
+## Common footprints in KiCad's libraries
+
+Most small parts on a board use standard packages that KiCad already has. Use these directly, and only draw or download a footprint for parts that aren't standard.
+
+To use one, set the symbol's **Footprint** field to the name below, or search for the short name, such as `R_0603`, in the footprint chooser. **Tools > Assign Footprints** in the Schematic Editor does many parts at once.
+
+### Chip sizes for resistors, capacitors, and similar parts
+
+Small rectangular parts are named by their size, using a four-digit code. Shops such as LCSC list the imperial code. KiCad's footprint names include both codes.
+
+| Imperial code | Metric code | Size (mm) | Hand soldering | Typical use |
+|---|---|---|---|---|
+| `0402` | `1005` | 1.0 × 0.5 | Hard | Dense boards assembled by JLCPCB |
+| `0603` | `1608` | 1.6 × 0.8 | Possible with care | **The usual default.** Small, and widely stocked as JLCPCB Basic parts |
+| `0805` | `2012` | 2.0 × 1.25 | Easy | Hand-assembled boards, and larger capacitor values |
+| `1206` | `3216` | 3.2 × 1.6 | Very easy | Higher power or voltage, fuses, large capacitors |
+
+Larger parts handle more power and voltage. Typical resistor power ratings:
+
+| Size | Typical power rating |
+|---|---|
+| `0402` | 1/16 W |
+| `0603` | 1/10 W |
+| `0805` | 1/8 W |
+| `1206` | 1/4 W |
+
+Ceramic capacitors lose much of their capacitance when a voltage is applied, and small packages lose more. For large values such as 10 µF and above, choose `0805` or bigger, and check the part's datasheet.
+
+KiCad also has a `_HandSolder` version of each chip footprint, with longer pads that are easier to solder with an iron. Use those on boards you'll assemble by hand.
+
+### Passive parts
+
+| Part | Footprint |
+|---|---|
+| Resistor | `Resistor_SMD:R_0603_1608Metric` (change the size code as needed) |
+| Ceramic capacitor | `Capacitor_SMD:C_0603_1608Metric` |
+| Inductor or ferrite bead | `Inductor_SMD:L_0805_2012Metric` |
+| Fuse | `Fuse:Fuse_1206_3216Metric` |
+| Electrolytic capacitor | `Capacitor_SMD:CP_Elec_6.3x5.4`. The numbers are the can's diameter and height in mm |
+| Crystal | `Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm` |
+
+### Diodes and LEDs
+
+| Part | Footprint |
+|---|---|
+| LED | `LED_SMD:LED_0603_1608Metric` |
+| Small signal or Schottky diode | `Diode_SMD:D_SOD-123`, or `D_SOD-323` for smaller |
+| Power diode or TVS diode | `Diode_SMD:D_SMA`. `D_SMB` and `D_SMC` are larger, for more power |
+
+### Transistors and regulators
+
+| Part | Footprint |
+|---|---|
+| Small transistor or MOSFET, 3 pins | `Package_TO_SOT_SMD:SOT-23` |
+| Small regulator or logic chip, 5 or 6 pins | `Package_TO_SOT_SMD:SOT-23-5`, `SOT-23-6` |
+| Linear regulator, medium power | `Package_TO_SOT_SMD:SOT-223-3_TabPin2` |
+| Medium-power transistor or regulator | `Package_TO_SOT_SMD:SOT-89-3` |
+| Power MOSFET or regulator (DPAK) | `Package_TO_SOT_SMD:TO-252-2` |
+
+### Chips
+
+| Package | Footprint | Pin pitch |
+|---|---|---|
+| SOIC-8 | `Package_SO:SOIC-8_3.9x4.9mm_P1.27mm` | 1.27 mm |
+| SOIC-16 | `Package_SO:SOIC-16_3.9x9.9mm_P1.27mm` | 1.27 mm |
+| MSOP-8 | `Package_SO:MSOP-8_3x3mm_P0.65mm` | 0.65 mm |
+| TSSOP-16 | `Package_SO:TSSOP-16_4.4x5mm_P0.65mm` | 0.65 mm |
+| QFN | `Package_DFN_QFN` library. Search for the pin count, such as `QFN-32` | Usually 0.5 mm |
+
+The numbers in a chip footprint's name give its body size and pin pitch. For example, `SOIC-8_3.9x4.9mm_P1.27mm` is 8 pins, a 3.9 × 4.9 mm body, and 1.27 mm pitch. Match all three against the datasheet before choosing one.
+
+### Connectors and test points
+
+| Part | Footprint |
+|---|---|
+| 0.1" pin header | `Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical` (change the pin count as needed) |
+| JST PH, 2 mm pitch | `Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical` |
+| JST XH, 2.5 mm pitch | `Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical` |
+| Test point | `TestPoint:TestPoint_Pad_D1.5mm` |
+
+Connector footprints must match the exact part number of the connector you buy. Check the manufacturer's part number in the footprint's name against the datasheet.
+
+Mounting holes are covered in [PCB.md](PCB.md#mounting-holes).
+
+### Choosing a size
+
+- **For boards JLCPCB will assemble,** use `0603` by default and `0402` where space is tight. Check that the part you want is a Basic part in that size.
+- **For boards you'll solder by hand,** use `0805` and the `_HandSolder` footprints.
+- **Keep sizes consistent across a board.** Fewer sizes means fewer mistakes and simpler ordering.
+- **Check the package against the part.** The footprint must match the size printed in the part's datasheet or LCSC listing. A `0603` resistor won't fit a `0805` footprint well.
 
 ## Coordinates
 
