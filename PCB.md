@@ -72,9 +72,10 @@ The **Constraints** page holds the hard limits. The design rules check reports a
 |---|---|---|
 | Minimum clearance | `0.15` | `0.127` |
 | Minimum track width | `0.15` | `0.127` |
+| Minimum connection width | `0.15` | `0.127` |
 | Minimum annular width | `0.15` | `0.15` |
 | Minimum via diameter | `0.6` | `0.5` |
-| Minimum through hole | `0.3` | `0.2` |
+| Minimum drill size | `0.3` | `0.2` |
 | Copper to hole clearance | `0.25` | `0.3` |
 | Copper to edge clearance | `0.3` | `0.3` |
 | Hole to hole clearance | `0.25` | `0.25` |
@@ -85,6 +86,11 @@ The **Constraints** page holds the hard limits. The design rules check reports a
 Four-layer boards are made on a finer process, so they allow narrower tracks and smaller vias. Inner layers need more room around plated holes, which is why copper-to-hole clearance goes up.
 
 If the board will be V-cut from a panel, set **Copper to edge clearance** to `0.5` on either kind of board.
+
+Two of these are easy to mix up:
+
+- **Minimum drill size** is the smallest hole that can be drilled, for vias and plated through-holes alike. Some KiCad versions label it **Minimum through hole**.
+- **Minimum connection width** is the narrowest neck of copper allowed anywhere, including thin bridges inside a filled zone. A neck narrower than the factory can etch may break. Set it equal to the minimum track width.
 
 For each kind of board, the sections below list every value on its own, so you can copy it with the copy button and paste it into the matching box.
 
@@ -103,6 +109,12 @@ Minimum track width:
 0.15
 ```
 
+Minimum connection width:
+
+```
+0.15
+```
+
 Minimum annular width:
 
 ```
@@ -115,7 +127,7 @@ Minimum via diameter:
 0.6
 ```
 
-Minimum through hole:
+Minimum drill size:
 
 ```
 0.3
@@ -174,6 +186,12 @@ Minimum track width:
 0.127
 ```
 
+Minimum connection width:
+
+```
+0.127
+```
+
 Minimum annular width:
 
 ```
@@ -186,7 +204,7 @@ Minimum via diameter:
 0.5
 ```
 
-Minimum through hole:
+Minimum drill size:
 
 ```
 0.2
@@ -236,9 +254,10 @@ JLCPCB's own limits, for reference, from its capabilities page (1 oz copper, in 
 |---|---|---|
 | Minimum clearance | 0.10 | 0.09 |
 | Minimum track width | 0.10 | 0.09 |
+| Minimum connection width | 0.10 | 0.09 |
 | Minimum annular width | 0.18 on plated holes | 0.15 on plated holes |
 | Minimum via diameter | 0.25 | 0.25 |
-| Minimum through hole | 0.15 | 0.15 |
+| Minimum drill size | 0.15 | 0.15 |
 | Copper to hole clearance | 0.2 | 0.2, and 0.3 from plated holes on inner layers |
 | Copper to edge clearance | 0.2 routed, 0.4 V-cut | 0.2 routed, 0.4 V-cut |
 | Hole to hole clearance | 0.2 via, 0.45 pad | 0.2 via, 0.45 pad |
