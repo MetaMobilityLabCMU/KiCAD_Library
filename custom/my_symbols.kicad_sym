@@ -28,8 +28,8 @@
 				)
 			)
 		)
-		(property "Footprint" ""
-			(at 0 0 0)
+		(property "Footprint" "my_footprints:Teensy_4p1"
+			(at 0.254 -32.258 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -52,6 +52,39 @@
 		)
 		(property "Description" ""
 			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacter" "PJRC"
+			(at 0 -39.37 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Model Link" "https://www.snapeda.com/parts/DEV-16771/SparkFun%20Electronics/view-part/?ref=search&t=Teensy%204.1&ab_test_case=b"
+			(at -0.254 -35.306 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Dimensions" "https://www.pjrc.com/teensy/dimensions.html"
+			(at -0.254 -42.672 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
