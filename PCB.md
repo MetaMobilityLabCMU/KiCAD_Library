@@ -7,6 +7,7 @@ The rule values in this guide come from JLCPCB's [capabilities page](https://jlc
 - [The layout flow](#the-layout-flow)
 - [Before you start](#before-you-start)
 - [Set up the board for JLCPCB](#set-up-the-board-for-jlcpcb)
+- [Bring the parts into the PCB Editor](#bring-the-parts-into-the-pcb-editor)
 - [The grid](#the-grid)
 - [Board outline](#board-outline)
 - [Mounting holes](#mounting-holes)
@@ -28,7 +29,7 @@ The rule values in this guide come from JLCPCB's [capabilities page](https://jlc
 |---|---|---|
 | 1. Finish the schematic | Schematic Editor | ERC is clean and every symbol has a footprint |
 | 2. Set up the board | **File > Board Setup** | Layers, rules, and net classes match JLCPCB |
-| 3. Bring the parts over | **Tools > Update PCB from Schematic** (F8) | Every footprint is on the canvas, joined by thin ratsnest lines |
+| 3. Bring the parts over | **Tools > Update PCB from Schematic** (F8). See [Bring the parts into the PCB Editor](#bring-the-parts-into-the-pcb-editor) | Every footprint is on the canvas, joined by thin ratsnest lines |
 | 4. Draw the board outline | `Edge.Cuts` layer | One closed outline |
 | 5. Add mounting holes | Footprints from the `MountingHole` library | Holes sit where the enclosure or standoffs need them |
 | 6. Place the parts | Move, rotate, flip | Every part inside the outline, no courtyards overlapping |
@@ -198,6 +199,58 @@ You don't have to repeat this for every board. Either:
 
 - **Keep a template project** with these settings, and start new boards from it with **File > New Project from Template**, or
 - **Copy from an existing board:** in Board Setup, click **Import Settings from Another Board** at the bottom, pick a board that's already set up, and choose which pages to copy.
+
+## Bring the parts into the PCB Editor
+
+The schematic and the board are separate files. Parts don't appear on the board by themselves: you copy them across with **Update PCB from Schematic**. You use the same command again whenever the schematic changes.
+
+### The first time
+
+1. **Save the schematic.**
+2. **Open the PCB Editor,** either with the **PCB Editor** button in the main KiCad window, or with the PCB Editor button on the Schematic Editor's top toolbar.
+3. **Click Tools > Update PCB from Schematic,** or press **F8**.
+4. **Read the list of changes** in the dialog. It shows every footprint it is about to add, and any problems.
+5. **Click Update PCB.**
+6. **Click to drop the parts.** They arrive as one cluster stuck to the cursor. Click once to set them down beside the board outline, out of the way.
+7. **Close the dialog.**
+
+Each part now sits on the board as its footprint, connected to the others by thin straight lines. Those lines are the **ratsnest**: connections from the schematic that are still waiting to be routed.
+
+If the dialog reports errors, fix them in the schematic and run it again:
+
+| Message | Cause and fix |
+|---|---|
+| No footprint assigned | A symbol has an empty Footprint field. Assign one in the schematic |
+| Footprint not found in library | The Footprint field names a library or footprint that doesn't exist. Check the spelling, and that the library is added in KiCad |
+| Pin not found in footprint | A symbol pin Number has no matching pad. See [Footprint.md](Footprint.md#link-the-footprint-to-the-symbol) |
+| Duplicate reference, or `?` in a reference | The schematic isn't annotated. Run **Tools > Annotate Schematic** |
+
+### After changing the schematic
+
+Run the same command again.
+
+1. Change the schematic and **save it**.
+2. In the PCB Editor, press **F8**.
+3. Check the list of changes, then click **Update PCB**.
+
+KiCad only applies the differences. Everything you've already placed and routed stays where it is.
+
+| You changed in the schematic | What happens on the board |
+|---|---|
+| Added a part | It arrives on the cursor, ready to place |
+| Deleted a part | It's removed from the board, if the option to delete footprints with no symbol is ticked |
+| Changed a connection | The ratsnest updates. Tracks that no longer belong on a net are flagged by the design rules check |
+| Changed a part's footprint | The new footprint replaces the old one in the same spot, if the option to replace footprints is ticked |
+| Changed a value or reference | The text on the board updates |
+
+Leave the dialog's options at their defaults. One exception: if you placed something directly on the board that has no symbol, such as a logo or a mounting hole, untick the option to delete footprints with no symbol, or it will be removed.
+
+### Keeping the two in step
+
+- **Make electrical changes in the schematic,** then update the board. Changing connections only on the board means the schematic no longer matches what you build.
+- **Going the other way:** if you change something on the board that belongs in the schematic, such as a part's footprint, push it back with **Tools > Update Schematic from PCB** in the PCB Editor.
+- **The design rules check spots a mismatch.** With **Test for parity between PCB and schematic** ticked, it lists anything that differs between the two.
+- **Cross-probing:** with both editors open, clicking a part in one highlights it in the other. This makes it easy to find a part on a crowded board.
 
 ## The grid
 
