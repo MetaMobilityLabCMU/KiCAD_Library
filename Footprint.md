@@ -11,6 +11,8 @@ These instructions are written for KiCad 10, with JLCPCB as the manufacturer.
 - [Pad standards](#pad-standards)
 - [The example part](#the-example-part)
 - [Draw the footprint](#draw-the-footprint)
+- [Use the Footprint Wizard](#use-the-footprint-wizard)
+- [Reuse one of KiCad's 3D models](#reuse-one-of-kicads-3d-models)
 - [Link the footprint to the symbol](#link-the-footprint-to-the-symbol)
 - [How the editor behaves](#how-the-editor-behaves)
 - [Common mistakes](#common-mistakes)
@@ -34,6 +36,7 @@ Decide the Numbers once, on the symbol, and copy them onto the pads.
 
 - **Reuse first.** Standard packages such as SOIC, QFN, and 0.1" pin headers are already in KiCad's built-in libraries. Use those directly.
 - **Start from a near match.** If a built-in footprint is close, open it, click **File > Save As**, save it into `my_footprints` under a new name, and edit the copy. Never edit the built-in one.
+- **Use the Footprint Wizard** for standard shapes, such as SOIC or QFN, when KiCad's libraries don't have the exact size. See [Use the Footprint Wizard](#use-the-footprint-wizard).
 - **Use the datasheet's recommended PCB layout.** It is a separate drawing from the one of the part itself, usually titled "recommended land pattern" or "PCB layout". Development boards and modules often have a "dimensions" drawing instead.
 - **Check which side the drawing shows.** Footprints are drawn looking down at the top of the board. If the drawing is labelled "bottom view", mirror it.
 - **Find out what each dimension is measured from.** Some are from the board edge and some are from the centre of the first hole. Mixing them up shifts everything.
@@ -264,12 +267,105 @@ Only `REF**` is printed on the real board.
 
 Follow [step 4 of the README](README.md#4-attach-the-3d-model). The path must start with `${MY_LIBS}`.
 
+For a standard package, you can reuse one of KiCad's own models instead of finding one. See [Reuse one of KiCad's 3D models](#reuse-one-of-kicads-3d-models).
+
 ### 7. Check and save
 
 1. Click **Inspect > Footprint Checker** and fix anything it reports.
 2. Use the measure tool to confirm the pitch, the distance between rows, and the overall span.
 3. Press **Ctrl+S**.
 4. Print the footprint at 100% scale and set the real part on the paper. Every pin should land on its pad.
+
+## Use the Footprint Wizard
+
+The Footprint Wizard builds common package shapes from a handful of numbers. It places and numbers the pads and draws the outlines for you. It has wizards for families such as SOIC / SSOP / TSSOP, DIP, QFN, QFP, and BGA.
+
+Use it when a part has a standard shape but KiCad's libraries don't have the exact size. Check the built-in libraries first. For a common package such as SOIC-8, KiCad already has the footprint, and often the part's symbol too, so you may not need to make anything.
+
+### Steps
+
+1. **Open the wizard.** In the Footprint Editor, click **File > New Footprint Using Footprint Wizard**, or the wizard button on the top toolbar.
+2. **Choose the wizard.** Click the **Select Wizard** button at the top of the wizard window, and pick the one for your package family.
+3. **Fill in the parameters** in the list on the left. The preview on the right updates as you type.
+4. **Send it to the editor.** Click **Export footprint to editor** on the wizard's toolbar. The footprint opens in the Footprint Editor.
+5. **Save it.** Click **File > Save As**, choose `my_footprints`, and give it a clear name.
+6. **Check it and finish it** as below, then add a 3D model.
+
+### Worked example: SOIC-8
+
+The example part is the NXP TJA1051T CAN transceiver (LCSC `C38695`), in a SOIC-8 package with a 3.9 mm (150 mil) body. KiCad already has this exact footprint as `Package_SO:SOIC-8_3.9x4.9mm_P1.27mm`, so in practice you'd use that. It makes a good example because you can compare your result against it.
+
+Choose the SOIC / SSOP / TSSOP wizard, then fill in the parameters. Their names may differ slightly between versions, so match them by meaning:
+
+| Parameter | Value | What it is |
+|---|---|---|
+| Number of pads | `8` | Total pins, 4 per side |
+| Pitch | `1.27` | Distance between neighbouring pins |
+| Row spacing | `4.95` | Pad centre to pad centre, across the body |
+| Pad length | `1.95` | Pad size along the lead |
+| Pad width | `0.6` | Pad size across the lead |
+
+Where the numbers come from:
+
+- **Pitch** is in the datasheet's package drawing, usually labelled `e`.
+- **Pad size and row spacing** come from the datasheet's recommended land pattern, if it has one. The values above match KiCad's own SOIC-8 footprint, which follows the IPC-7351 standard.
+- **Body size** (3.9 × 4.9 mm here) is in the package drawing, and is only used for the outlines.
+
+Save it as, for example, `SOIC-8_3.9x4.9mm_P1.27mm`.
+
+### Check what the wizard made
+
+The wizard does the arithmetic, but check its output before using it:
+
+- **Pad numbering:** pad 1 is marked, and the pads are numbered 1 to 4 down one side and 5 to 8 up the other, counter-clockwise viewed from above.
+- **Dimensions:** use the measure tool (**Ctrl+Shift+M**) to confirm the pitch and row spacing.
+- **Outlines:** `F.Fab`, `F.Silkscreen`, and `F.Courtyard` are all present. Add any that are missing, as in [step 4](#4-draw-the-outlines-on-three-layers).
+- **Pad Numbers** match the symbol's pin Numbers. See [Link the footprint to the symbol](#link-the-footprint-to-the-symbol).
+- **Compare with KiCad's version,** when there is one. Open the built-in footprint next to yours. They should match closely.
+- **Run Inspect > Footprint Checker.**
+
+## Reuse one of KiCad's 3D models
+
+KiCad installs 3D models for all its standard packages. A footprint you made for a standard package, by hand or with the wizard, can use one of them.
+
+### Option 1: Copy the model into the library (recommended)
+
+1. **Find KiCad's model folder.** In the main KiCad window, open **Preferences > Configure Paths** and look at `KICAD10_3DMODEL_DIR`. On Windows it is usually:
+
+   ```
+   C:\Program Files\KiCad\10.0\share\kicad\3dmodels
+   ```
+
+2. **Copy the model.** Models are grouped by library. For SOIC-8, open `Package_SO.3dshapes` and copy `SOIC-8_3.9x4.9mm_P1.27mm.step` into `KiCAD_Library/custom/3dmodels/`.
+3. **Attach it.** Open your footprint, click **File > Footprint Properties**, and open the **3D Models** tab.
+4. **Enter the path.** Click **+** and enter the path to your copy:
+
+   ```
+   ${MY_LIBS}/custom/3dmodels/SOIC-8_3.9x4.9mm_P1.27mm.step
+   ```
+
+5. **Check the preview,** as below. Click **OK**, then press **Ctrl+S**.
+6. **Commit both files:** the footprint and the `.step` model.
+
+This works on every computer that has the library, and keeps working after a KiCad upgrade. KiCad's 3D models are licensed to allow this kind of reuse.
+
+### Option 2: Point to KiCad's own copy
+
+Skip the copy, and enter KiCad's path in step 4 instead:
+
+```
+${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step
+```
+
+This is quicker, and works for anyone with KiCad 10 and its 3D models installed. The variable has the version number in it, though, so after an upgrade the model may go missing until the path is fixed. That's why Option 1 is preferred for this library.
+
+### Check the preview
+
+KiCad's models are centred where KiCad's own footprints put their origin. For surface-mount packages, that is the middle of the body.
+
+- **If your footprint's origin is also at the centre,** the model sits on the pads without changes.
+- **If the model is shifted** so its leads miss the pads, your footprint's origin is somewhere else, often pad 1. Fix it with **Offset X** and **Offset Y** until the leads land on the pads.
+- **If pin 1 is at the wrong end,** check that the model's dot or chamfer is at pad 1's end. If it isn't, set **Rotation Z** to `180`.
 
 ## Link the footprint to the symbol
 
