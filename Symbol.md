@@ -1,13 +1,15 @@
 # Making a schematic symbol
 
-How to draw a symbol for `my_symbols` when no download exists for the part, and the rules that keep it correct. For importing a downloaded part, see the [README](README.md#add-a-part-to-the-library).
+How to draw a symbol for `my_symbols` when no download exists for the part. For importing a downloaded part, see the [README](README.md#add-a-part-to-the-library). For the matching footprint, see [Footprint.md](Footprint.md).
 
 These instructions are written for KiCad 10.
 
 - [Name and Number](#name-and-number)
+- [The example part](#the-example-part)
 - [Draw the symbol](#draw-the-symbol)
 - [Electrical types](#electrical-types)
 - [Parts with several ground or power pins](#parts-with-several-ground-or-power-pins)
+- [Link the symbol to its footprint](#link-the-symbol-to-its-footprint)
 - [Best practices](#best-practices)
 - [Fixing "Duplicate pin" warnings](#fixing-duplicate-pin-warnings)
 - [Checklist before you commit](#checklist-before-you-commit)
@@ -25,10 +27,34 @@ KiCad connects a symbol pin to the footprint pad that has the same Number. That 
 
 - **Every pin needs a Number.** A pin with an empty Number connects to nothing on the board.
 - **No two pins can share a Number.** Two empty Numbers count as the same Number.
-- **The Number must match the footprint pad exactly**, character for character.
+- **The Number must match the footprint pad exactly.** `VIN` and `Vin` are different Numbers.
 - **Names are free.** Three pins can all be named `GND`. A Name can also be left empty when the Number already says everything.
 
 A Number does not have to be a digit. Text such as `GND1` or `VIN` is allowed, as long as the footprint pad carries the same text.
+
+For a module or development board, there are two reasonable ways to choose Numbers. Pick one and use it on both the symbol and the footprint.
+
+| Scheme | Example Numbers | Good for |
+|---|---|---|
+| Position around the edge | `1`, `2`, `3` ... | Any part. Matches how chips are numbered |
+| The labels printed on the board | `0`, `1`, `A3`, `GND1`, `VIN` | Boards where people think in the printed labels. Repeated labels such as GND need a suffix to stay unique |
+
+## The example part
+
+The steps below use one made-up part so the values are concrete: a small plug-in module with 8 pins. [Footprint.md](Footprint.md#the-example-part) draws the footprint for the same part.
+
+| Number | Name | Electrical type | Side of the symbol |
+|---|---|---|---|
+| `1` | `VIN` | Power input | Left |
+| `2` | `GND` | Power input | Left |
+| `3` | `D0` | Bidirectional | Left |
+| `4` | `D1` | Bidirectional | Left |
+| `5` | `D2` | Bidirectional | Right |
+| `6` | `D3` | Bidirectional | Right |
+| `7` | `GND` | Power input | Right |
+| `8` | `3V3` | Power output | Right |
+
+Pins `2` and `7` share the Name `GND`. That is allowed, because their Numbers differ.
 
 ## Draw the symbol
 
@@ -44,10 +70,10 @@ A Number does not have to be a digit. Text such as `GND1` or `VIN` is allowed, a
    | `SW` | Switches |
 
 3. Set the grid to **50 mil (1.27 mm)** and leave it there while you work.
-4. Draw the body with the rectangle tool, centred on the origin (the crosshair at 0,0).
-5. Press **P** to add a pin. Fill in its Name, Number, and Electrical type, then click to place it. The end with the small circle is where a wire attaches, so it points away from the body.
+4. Draw the body with the rectangle tool, centred on the origin (the crosshair at 0, 0).
+5. Press **P** to add a pin. Fill in its Number, Name, and Electrical type, then click to place it. The end with the small circle is where a wire attaches, so it points away from the body.
 6. Repeat for every pin on the part, including ones you don't plan to use.
-7. Click **Edit > Pin Table** and read down the Number column. Look for blanks and repeats.
+7. Click **Edit > Pin Table** and read down the Number column. Look for blanks and repeats. The table is also the quickest place to edit many pins at once.
 8. Click **File > Symbol Properties** and fill in the fields:
 
    | Field | Set to |
@@ -77,6 +103,8 @@ The type tells KiCad's rule checker what a pin is allowed to connect to, so it c
 
 A rail should have exactly one Power output on it. If a part has two pins that both supply the same rail, make one Power output and the other Passive. Two Power outputs wired together are reported as a conflict.
 
+Use Power output, not plain Output, for a pin that supplies a voltage rail. Plain Output is for signals.
+
 ## Parts with several ground or power pins
 
 Keep them as separate pins with the same Name and different Numbers.
@@ -93,15 +121,37 @@ Three things to know:
 - **KiCad expects copper to every pad.** It does not know the pins are already joined inside the part. A ground pour on the board handles this.
 - **You may see "Input Power pin not driven"** on a net that has only Power input pins. Place one `PWR_FLAG` symbol on that net to clear it.
 
+Some of KiCad's own symbols for large chips place identical pins exactly on top of each other, so one wire connects them all. With only a few pins, keep them separate, so you can see which pin is which.
+
+## Link the symbol to its footprint
+
+Two things join a symbol to a footprint.
+
+| Link | Where it is set | What it must match |
+|---|---|---|
+| Which footprint to use | The symbol's **Footprint** field | The footprint's library and name, as `my_footprints:FOOTPRINT_NAME` |
+| Which pin goes to which pad | Each pin's **Number** | The Number on the footprint pad, exactly |
+
+Set the Footprint field in **File > Symbol Properties**:
+
+```
+my_footprints:FOOTPRINT_NAME
+```
+
+To check it, reopen Symbol Properties and click the library icon at the end of the Footprint cell. The footprint browser should open with the right footprint selected.
+
+[Footprint.md](Footprint.md#link-the-footprint-to-the-symbol) covers the pad side, and how to test the link in a schematic.
+
 ## Best practices
 
 - **Pins 100 mil (2.54 mm) apart and 100 mil long**, with 50 mil text. This matches KiCad's own libraries, so your symbol lines up with theirs.
 - **Keep every pin on the grid.** A pin placed off the grid will not meet wires in a schematic.
 - **Arrange pins so the schematic reads well.** For chips: inputs on the left, outputs on the right, power at the top, ground at the bottom. For development boards and modules, copying the physical pin layout is also fine.
 - **Don't hide pins.** A hidden pin can connect to a net without anyone seeing it.
-- **Don't stack pins on top of each other** unless you mean to. Stacked pins all connect to one wire, which hides which pin is which.
+- **Don't stack pins on top of each other** unless you mean to. Stacked pins all connect to one wire.
 - **Include every pin on the part**, even unused ones, so the symbol and footprint have the same count.
 - **Check Numbers against the datasheet**, not against another person's symbol.
+- **Give the symbol and its footprint the same name** where you can, so they are easy to pair up.
 
 ## Fixing "Duplicate pin" warnings
 
@@ -115,6 +165,8 @@ The text in quotes is each pin's **Name**. The thing that is duplicated is the *
 
 The usual cause is that the unique labels were typed into the Name field and the Number field was left empty. Every pin with an empty Number then counts as a duplicate of the others.
 
+You can tell from the canvas which field a label is in. Names are drawn inside the body. Numbers are drawn above the pin line, outside the body. A pin with nothing above its line has no Number.
+
 To fix it:
 
 1. Click **Edit > Pin Table**.
@@ -126,7 +178,7 @@ To fix it:
 ## Checklist before you commit
 
 - [ ] Every pin has a Number, and no Number repeats.
-- [ ] Each Number matches a pad on the footprint.
+- [ ] Each Number matches a pad on the footprint exactly, including upper and lower case.
 - [ ] Each Number matches the datasheet.
 - [ ] Electrical types are set, with one Power output per rail at most.
 - [ ] All pins are on the grid and none are hidden.

@@ -5,14 +5,20 @@ MEMO KiCAD custom parts: a shared library of schematic symbols, PCB footprints, 
 These instructions are written for KiCad 10. Menu names may differ slightly in older versions.
 
 - [What's in here](#whats-in-here)
+- [Guides](#guides)
+- [How a part fits together](#how-a-part-fits-together)
 - [Set up the library in KiCad](#set-up-the-library-in-kicad) (one time)
 - [Add a part to the library](#add-a-part-to-the-library)
 - [Conventions](#conventions)
+- [Troubleshooting](#troubleshooting)
 
 ## What's in here
 
 ```
 KiCAD_Library/
+├── README.md                     this page: setup, and importing downloaded parts
+├── Symbol.md                     guide to drawing a schematic symbol
+├── Footprint.md                  guide to drawing a PCB footprint
 ├── custom/                       parts we downloaded or drew, and checked by hand
 │   ├── my_symbols.kicad_sym      schematic symbols (all in this one file)
 │   ├── my_footprints.pretty/     PCB footprints (one .kicad_mod file per part)
@@ -26,6 +32,34 @@ KiCAD_Library/
 Inside KiCad these appear as the symbol libraries `my_symbols` and `lcsc`, and the footprint libraries `my_footprints` and `lcsc`.
 
 Parts in `lcsc` were converted by a script (`easyeda2kicad`) and have not been checked by hand. Compare the footprint against the datasheet before you order a board that uses one.
+
+## Guides
+
+| Guide | Read it when |
+|---|---|
+| This README | You are setting up KiCad, or adding a part you downloaded |
+| [Symbol.md](Symbol.md) | You need to draw a schematic symbol yourself |
+| [Footprint.md](Footprint.md) | You need to draw a PCB footprint yourself |
+
+## How a part fits together
+
+A complete part is three pieces:
+
+| Piece | What it is | File type | Lives in |
+|---|---|---|---|
+| Symbol | The part as drawn in a schematic | `.kicad_sym` | `my_symbols` |
+| Footprint | The pads, holes, and outlines on the board | `.kicad_mod` | `my_footprints` |
+| 3D model | The part's shape, for the 3D viewer | `.step` | `custom/3dmodels/` |
+
+KiCad does not join them automatically. Three links do, and each one is plain text that has to match:
+
+| Link | Where it is set | What it must match |
+|---|---|---|
+| Symbol to footprint | The symbol's **Footprint** field | The footprint's library and name, as `my_footprints:FOOTPRINT_NAME` |
+| Pin to pad | Each symbol pin's **Number** | The **Number** on a footprint pad, exactly |
+| Footprint to 3D model | The footprint's **3D Models** tab | The model file's path, starting with `${MY_LIBS}` |
+
+Most problems with a part come down to one of these three not matching.
 
 ## Set up the library in KiCad
 
@@ -117,15 +151,15 @@ Designs you already made do not change when you pull. KiCad copies each symbol a
 
 ## Add a part to the library
 
-Check KiCad's built-in libraries first. Resistors, capacitors, and common chip packages are already there, and you should use those. Add a part here only when the built-in libraries don't have it.
+There are three routes, in order of preference:
 
-A complete part is three files that have to be linked together:
+| Situation | What to do |
+|---|---|
+| KiCad's built-in libraries have the part | Use it from there. Nothing is added to this library |
+| A parts website has a KiCad download | Import it, with the steps below |
+| No download exists | Draw the symbol with [Symbol.md](Symbol.md) and the footprint with [Footprint.md](Footprint.md), then do steps 4 to 7 below |
 
-| Piece | File type | Goes in |
-|---|---|---|
-| Schematic symbol | `.kicad_sym` | `my_symbols` |
-| PCB footprint | `.kicad_mod` | `my_footprints` |
-| 3D model | `.step` | `custom/3dmodels/` |
+Resistors, capacitors, and common chip packages are already in the built-in libraries. Add a part here only when they don't have it.
 
 In the steps below, `PART_NAME` and `FOOTPRINT_NAME` are placeholders. Replace them with the names of the files you downloaded.
 
@@ -182,7 +216,7 @@ Never browse to the file and leave a path that starts with `C:/Users/...`. That 
 
 ### 5. Link the symbol to the footprint
 
-KiCad does not link them automatically. The link is a text field on the symbol named **Footprint**, written as `library:footprint`. When you place the symbol in a schematic and update the PCB, KiCad reads that field to pick the footprint, then connects symbol pin 1 to pad 1, pin 2 to pad 2, and so on.
+KiCad does not link them automatically. The link is a text field on the symbol named **Footprint**, written as `library:footprint`. When you place the symbol in a schematic and update the PCB, KiCad reads that field to pick the footprint. It then connects each symbol pin to the pad that has the same Number.
 
 1. In the **Symbol Editor**, open the symbol and click **File > Symbol Properties**.
 2. Set the **Footprint** field to the line below, replacing `FOOTPRINT_NAME` with the footprint's name as it appears under `my_footprints` in the Footprint Editor:
@@ -206,7 +240,7 @@ To check the link, reopen Symbol Properties and click the library icon at the en
 
 Downloaded parts are usually right, but not always. Before anyone orders a board with it, confirm:
 
-- **Pin numbers:** each symbol pin number matches the footprint pad with the same number, and both match the datasheet. On power connectors, confirm which pad is positive and which is negative.
+- **Pin numbers:** every symbol pin Number has a footprint pad with exactly the same Number, and both match the datasheet. On power connectors, confirm which pad is positive and which is negative.
 - **Pad positions:** hole and pad spacing match the recommended layout drawing in the datasheet.
 - **3D model:** the body sits on the board and the pins line up with the pads.
 
@@ -230,4 +264,21 @@ A normal part changes three things: `custom/my_symbols.kicad_sym`, one new `.kic
 - **Don't rename the libraries.** The nicknames `my_symbols`, `my_footprints`, and `lcsc` are stored inside the parts.
 - **Don't edit KiCad's built-in libraries.** Changes there are lost when KiCad updates. To modify a built-in part, save a copy into `my_symbols` or `my_footprints` and edit the copy.
 - **Fill in `LCSC Part #`** on every symbol that JLCPCB will assemble.
+- **Give a symbol and its footprint the same name** where you can, so they are easy to pair up.
+- **Treat pin and pad Numbers as exact text.** `VIN` and `Vin` do not match.
+- **Run the checker before committing:** **Inspect > Check Symbol** in the Symbol Editor and **Inspect > Footprint Checker** in the Footprint Editor.
 - **Check the license before committing downloaded models** if this repository is ever made public. Some vendors do not allow their symbol, footprint, or 3D files to be redistributed.
+
+## Troubleshooting
+
+| Problem | Cause and fix |
+|---|---|
+| A library is not in the list | Close KiCad completely and reopen it. If it is still missing, add it under **Preferences > Manage Symbol Libraries** or **Manage Footprint Libraries** |
+| KiCad did not ask Global or Project when creating a library | It only asks when a project is open. With no project open, the library is added as Global |
+| Pads show but there is no 3D model | The `MY_LIBS` path is wrong, or the model path in the footprint does not start with `${MY_LIBS}` |
+| The 3D model is tilted or off the pads | Set Rotation and Offset on the footprint's **3D Models** tab. See [step 4](#4-attach-the-3d-model) |
+| "Duplicate pin" warnings on a symbol | Pin Numbers are empty or repeated. See [Symbol.md](Symbol.md#fixing-duplicate-pin-warnings) |
+| A pad has no net after updating the board | Its Number does not match any symbol pin Number. See [Footprint.md](Footprint.md#link-the-footprint-to-the-symbol) |
+| An old design did not change after a pull | Designs keep their own copy of each part. See [Getting updates](#getting-updates) |
+| Git warns that LF will be replaced by CRLF | Harmless. It is a line-ending difference between Windows and the repository |
+| Git reports a conflict in `my_symbols.kicad_sym` | Two people added symbols at the same time. Pull before adding a part, and push right after |
