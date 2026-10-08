@@ -19,6 +19,8 @@ KiCAD_Library/
 ├── README.md                     this page: setup, and importing downloaded parts
 ├── Symbol.md                     guide to drawing a schematic symbol
 ├── Footprint.md                  guide to drawing a PCB footprint
+├── PCB.md                        guide to laying out a board
+├── Manufacture.md                guide to exporting files and ordering from JLCPCB
 ├── custom/                       parts we downloaded or drew, and checked by hand
 │   ├── my_symbols.kicad_sym      schematic symbols (all in this one file)
 │   ├── my_footprints.pretty/     PCB footprints (one .kicad_mod file per part)
@@ -40,6 +42,8 @@ Parts in `lcsc` were converted by a script (`easyeda2kicad`) and have not been c
 | This README | You are setting up KiCad, or adding a part you downloaded |
 | [Symbol.md](Symbol.md) | You need to draw a schematic symbol yourself |
 | [Footprint.md](Footprint.md) | You need to draw a PCB footprint yourself |
+| [PCB.md](PCB.md) | You are laying out a board: setup, placement, routing, and checks |
+| [Manufacture.md](Manufacture.md) | The board is finished and you are exporting files and ordering |
 
 ## How a part fits together
 
