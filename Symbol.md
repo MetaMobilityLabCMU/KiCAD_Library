@@ -105,6 +105,34 @@ A rail should have exactly one Power output on it. If a part has two pins that b
 
 Use Power output, not plain Output, for a pin that supplies a voltage rail. Plain Output is for signals.
 
+### Connectors and other passive parts
+
+Some parts only carry current through. They don't drive a signal or need one driven into them to work. Every pin on these parts is **Passive**:
+
+- Connectors and pin headers
+- Resistors, capacitors, and inductors
+- Fuses, switches, and jumpers
+- Test points
+
+This holds even when a connector carries power or a specific signal:
+
+- **Power connectors:** a battery connector's `+` and `-` pins are Passive, not Power input or Power output. The same connector might bring power onto one board and pass it on from another, and Passive suits both.
+- **Signal pins:** a connector carrying CAN, UART, or anything else is still Passive. The chip that actually drives the signal, such as a CAN transceiver, has the real types (Bidirectional for CANH and CANL). The rule checker checks the signal there.
+- **Shared library symbols:** the same connector symbol may carry different signals in different projects. Passive works for all of them. Show what a pin carries with net labels in the schematic, such as `CAN1+` or `+BATT`, not in the symbol.
+
+Wiring a Passive pin to any other type is fine in the rule checker.
+
+Because a Passive pin isn't a power source, a supply that comes in through a connector, such as a battery, needs a `PWR_FLAG` symbol on that net. Without it, the rule checker reports "Input Power pin not driven by any Output Power pins".
+
+#### The exception: modules with their own electronics
+
+A plug-in module, such as a microcontroller board or a sensor breakout, can look like a connector. But its pins are the module's real inputs, outputs, and supplies, so give them real types, as for a chip.
+
+| The part is... | Pin types |
+|---|---|
+| Just metal contacts, such as a connector or header | All Passive |
+| A board with chips on it, such as a Teensy or a sensor breakout | Real types: Power input, Output, Bidirectional, and so on |
+
 ## Parts with several ground or power pins
 
 Keep them as separate pins with the same Name and different Numbers.
@@ -181,6 +209,7 @@ To fix it:
 - [ ] Each Number matches a pad on the footprint exactly, including upper and lower case.
 - [ ] Each Number matches the datasheet.
 - [ ] Electrical types are set, with one Power output per rail at most.
+- [ ] Connectors and other parts that only carry current have every pin set to Passive.
 - [ ] All pins are on the grid and none are hidden.
 - [ ] The Footprint field is set to `my_footprints:FOOTPRINT_NAME`.
 - [ ] **Inspect > Check Symbol** reports nothing.
